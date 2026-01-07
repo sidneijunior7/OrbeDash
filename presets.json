@@ -1,0 +1,20 @@
+{
+    "Dukascopy": {
+        "ativos_b3": "WIN$N,WDO$N,DI1$N",
+        "mt5_b3_path": "C:\\Program Files\\MetaTrader 5 B3\\terminal64.exe",
+        "ativos_fx": "CHI.IDX,USDTBOND.TR,AUS.IDX,BRENT.CMD,SOA.IDX,VOL.IDX,DOLLAR.IDX,JPN.IDX,USATECH.IDX,USA500.IDX,USA30.IDX,DEU.IDX,USDMXN,USDZAR",
+        "mt5_fx_path": "C:\\Program Files\\MetaTrader 5\\terminal64.exe",
+        "ativo_alvo": "WIN$N",
+        "bars": 8,
+        "model": "gpt-5.1"
+    },
+    "Tickmill": {
+        "ativos_b3": "WIN$N,WDO$N,DI1$N,PETR4,IFNC,VALE3",
+        "mt5_b3_path": "C:\\Program Files\\MetaTrader 5 B3\\terminal64.exe",
+        "ativos_fx": "VIX,AUS200,AFRICA20,JP225,DXY,SG20,US500,USTEC,BRENT,USDMXN,USDZAR",
+        "mt5_fx_path": "C:\\Program Files\\MetaTrader 5\\terminal64.exe",
+        "ativo_alvo": "WIN$N",
+        "bars": 12,
+        "model": "gpt-5.1"
+    }
+}

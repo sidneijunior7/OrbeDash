@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+[data-testid="stHeader"] {
+            visibility: hidden;
+        }
+[data-testid="stSidebar"] {
+    visibility: hidden;
+    display: none;
+}
+[data-testid="stBaseButton-headerNoPadding"] {
+    visibility: hidden;
+}
+
+
+.stMain{
+        background: url("http://localhost/images/bg_sap.png")
+                        center center no-repeat #0d1117;
+        background-size: cover;
+
+    }
+@media (max-width: 1080px)
+{
+    [data-testid="stAppViewBlockContainer"]{
+        padding-top: 0 !important;
+    }
+    [data-testid="stHorizontalBlock"]{
+        gap: 0;
+    }
+    .central-coluna{
+        display: flex;
+        justify-content: center !important;
+    }
+    .central-coluna .h1{
+        font-size: 48px;
+        font-family: Poppins, Roboto, sans-serif;
+        color: white;
+
+    }
+    [data-baseweb="input"]{
+        border: 1px solid #b6c9db !important;
+        padding: 0.5rem;
+        height: auto;
+    }
+
+    [data-testid="stFormSubmitButton"] {
+            display: flex;
+            /*justify-content: center;*/
+
+        }
+    [data-testid="stFormSubmitButton"] button {
+        padding: 0.7rem 1.5rem;
+    }
+}
+@media (min-width: 1081px)
+{
+    .central-coluna{
+        display: flex;
+        justify-content: center !important;
+        margin-top: 15%;
+    }
+    .central-coluna .h1{
+        font-size: 48px;
+        font-family: Poppins, Roboto, sans-serif;
+        font-weight: 500;
+        color: white;
+
+    }
+    [data-baseweb="input"]{
+        border: 1px solid #303947 !important;
+        padding: 0.5rem;
+        height: auto;
+    }
+
+    [data-testid="stFormSubmitButton"] {
+            display: flex;
+            /*justify-content: center;*/
+
+        }
+    [data-testid="stFormSubmitButton"] button {
+        padding: 0.7rem 1.5rem;
+    }
+    [data-testid="stForm"]{
+        border: none;
+    }
+    div[data-testid="stVerticalBlock"]:has(> div.element-container > div.stMarkdown > div[data-testid="stMarkdownContainer"] > p > span.login){
+        background-color: #161b22;
+        padding: 4em;
+        border-radius: 1em;
+        border: 1px solid #202730;
+        box-shadow: 0 6px 9px rgba(0, 100, 255, 0.07),
+                0 1px 3px rgba(0, 100, 255, 0.04);
+    }
+}
