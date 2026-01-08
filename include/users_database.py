@@ -1,135 +1,146 @@
-import mysql.connector, os
+import os
 import streamlit
-from mysql.connector import Error
+import pymysql
+from pymysql import MySQLError
+
 
 def create_connection():
-    conn = None
     try:
-        conn = mysql.connector.connect(
-            host='localhost' if os.getenv("MYSQL_HOST") is None else os.getenv("MYSQL_HOST"),# or 'localhost',  # Ex: 'localhost'
-            user='root' if os.getenv("MYSQL_USER") is None else os.getenv("MYSQL_USER"),# or 'root',  # Ex: 'root'
-            password='' if os.getenv("MYSQL_PASSWORD") is None else os.getenv("MYSQL_PASSWORD"),# or '',
-            database='rdx_dash' if os.getenv("MYSQL_DATABASE") is None else os.getenv("MYSQL_DATABASE"),# or 'sap_wise_db',
-            port=3306 if os.getenv("MYSQL_PORT") is None else os.getenv("MYSQL_PORT"),# or 3306
+        conn = pymysql.connect(
+            host=os.getenv("MYSQL_HOST", "localhost"),
+            user=os.getenv("MYSQL_USER", "root"),
+            password=os.getenv("MYSQL_PASSWORD", ""),
+            database=os.getenv("MYSQL_DATABASE", "rdx_dash"),
+            port=int(os.getenv("MYSQL_PORT", 3306)),
+            connect_timeout=5,
+            cursorclass=pymysql.cursors.Cursor,
+            autocommit=False
         )
-        if conn.is_connected():
-            return conn
-    except Error as e:
-        streamlit.error(e)
-    return conn
+        return conn
+    except MySQLError as e:
+        streamlit.error(f"Erro ao conectar ao banco: {e}")
+        return None
 
 def create_table(conn):
-    create_table_sql = """ CREATE TABLE IF NOT EXISTS users (
-                                id INT AUTO_INCREMENT PRIMARY KEY,
-                                user_name VARCHAR(100) NOT NULL,
-                                user_email VARCHAR(150) NOT NULL UNIQUE,
-                                password VARCHAR(64) NOT NULL,
-                                salt VARCHAR(32) NOT NULL,
-                                contract_id VARCHAR(28) NOT NULL,
-                                contract_status VARCHAR(20) NOT NULL,
-                                profile_picture VARCHAR(150),
-                                description VARCHAR(150),
-                                token VARCHAR(50), 
-                                exp_time DATETIME,
-                                token_usado BOOLEAN DEFAULT TRUE
-                            ); """
-    cursor = conn.cursor()
+    if conn is None:
+        return False
+
+    create_table_sql = """
+        CREATE TABLE IF NOT EXISTS users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_name VARCHAR(100) NOT NULL,
+            user_email VARCHAR(150) NOT NULL UNIQUE,
+            password VARCHAR(64) NOT NULL,
+            salt VARCHAR(32) NOT NULL,
+            contract_id VARCHAR(28) NOT NULL,
+            contract_status VARCHAR(20) NOT NULL,
+            profile_picture VARCHAR(150),
+            description VARCHAR(150),
+            token VARCHAR(50), 
+            exp_time DATETIME,
+            token_usado BOOLEAN DEFAULT TRUE
+        );
+    """
     try:
-        cursor.execute(create_table_sql)
-        conn.commit()  # Commit the changes to the database
+        with conn.cursor() as cursor:
+            cursor.execute(create_table_sql)
+        conn.commit()
         return True
-    except Error as e:
-        return False  # Return False in case of an error
-    finally:
-        cursor.close()  # Close the cursor
+    except MySQLError as e:
+        streamlit.error(e)
+        return False
 
 def update_value(conn, table, key, value, username):
-    sql = f'''UPDATE {table} SET {key} = %s WHERE user_email = %s;'''
-    cursor = conn.cursor()
+    if conn is None:
+        return 0
+
+    sql = f"UPDATE {table} SET {key}=%s WHERE user_email=%s;"
     try:
-        cursor.execute(sql, (value, username))
+        with conn.cursor() as cursor:
+            cursor.execute(sql, (value, username))
         conn.commit()
         return cursor.rowcount
-    finally:
-        cursor.close()  # Close the cursor
+    except MySQLError:
+        return 0
+
 
 def get_user_info(conn, key, table, user_email):
-    cursor = conn.cursor()
-    try:
-        query = f"SELECT {key} FROM {table} WHERE user_email=%s"
+    if conn is None:
+        return []
+
+    query = f"SELECT {key} FROM {table} WHERE user_email=%s"
+    with conn.cursor() as cursor:
         cursor.execute(query, (user_email,))
-        rows = cursor.fetchall()
-        return rows
-    finally:
-        cursor.close()  # Close the cursor
+        return cursor.fetchall()
+
 
 def get_user_info_by_id(conn, key, table, user_id):
-    cursor = conn.cursor()
-    try:
-        query = f"SELECT {key} FROM {table} WHERE id=%s"
+    if conn is None:
+        return []
+
+    query = f"SELECT {key} FROM {table} WHERE id=%s"
+    with conn.cursor() as cursor:
         cursor.execute(query, (user_id,))
-        rows = cursor.fetchall()
-        return rows
-    finally:
-        cursor.close()  # Close the cursor
+        return cursor.fetchall()
+
 # ==========================================================
 # NOVAS FUNÇÕES PARA A PÁGINA ADMIN
 # ==========================================================
 
 def get_all_users(conn):
-    """Retorna todos os usuários cadastrados."""
-    cursor = conn.cursor(dictionary=True)
-    try:
+    if conn is None:
+        return []
+
+    with conn.cursor(pymysql.cursors.DictCursor) as cursor:
         cursor.execute("SELECT * FROM users ORDER BY id DESC;")
         return cursor.fetchall()
-    finally:
-        cursor.close()
-
 
 def count_active_users(conn):
-    """Conta quantidade de usuários com contract_status='active'."""
-    cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT COUNT(*) FROM users WHERE contract_status='active';")
-        return cursor.fetchone()[0]
-    finally:
-        cursor.close()
+    if conn is None:
+        return 0
 
+    with conn.cursor() as cursor:
+        cursor.execute(
+            "SELECT COUNT(*) FROM users WHERE contract_status='active';"
+        )
+        return cursor.fetchone()[0]
 
 def insert_new_user(conn, name, email, password, salt, status):
-    """Insere novo usuário no sistema."""
-    cursor = conn.cursor()
-    sql = """INSERT INTO users (user_name, user_email, password, salt, 
-                                contract_status)
-             VALUES (%s, %s, %s, %s, %s)"""
-    try:
+    if conn is None:
+        return None
+
+    sql = """
+        INSERT INTO users 
+        (user_name, user_email, password, salt, contract_status)
+        VALUES (%s, %s, %s, %s, %s)
+    """
+    with conn.cursor() as cursor:
         cursor.execute(sql, (name, email, password, salt, status))
         conn.commit()
         return cursor.lastrowid
-    finally:
-        cursor.close()
-
 
 def update_user_status(conn, user_email, new_status):
-    """Atualiza o status do usuário (active / revoked)."""
-    cursor = conn.cursor()
-    try:
+    if conn is None:
+        return 0
+
+    with conn.cursor() as cursor:
         cursor.execute(
             "UPDATE users SET contract_status=%s WHERE user_email=%s",
             (new_status, user_email)
         )
         conn.commit()
         return cursor.rowcount
-    finally:
-        cursor.close()
+
 
 
 def delete_user(conn, user_email):
-    """Remove um usuário do banco."""
-    cursor = conn.cursor()
-    try:
-        cursor.execute("DELETE FROM users WHERE user_email=%s", (user_email,))
+    if conn is None:
+        return 0
+
+    with conn.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM users WHERE user_email=%s",
+            (user_email,)
+        )
         conn.commit()
         return cursor.rowcount
-    finally:
-        cursor.close()
