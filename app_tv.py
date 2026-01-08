@@ -409,8 +409,7 @@ if st.session_state.logged_in:
         # ---------------------------------------------------------
         # Cabeçalho com timestamp e resumo da tendência
         # ---------------------------------------------------------
-        st.caption(f"Data e hora da consulta {pd.to_datetime(data.get("timestamp_utc", "-"), yearfirst=True).strftime('%d/%m/%Y %H:%M')}")
-
+        st.caption(f'Data e hora da consulta {pd.to_datetime(data.get("timestamp_utc", "-"), yearfirst=True).strftime("%d/%m/%Y %H:%M")}')
         st.subheader(f"Resumo do Cenário")
         st.write(data.get("trend_summary", "-"))
 
