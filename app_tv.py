@@ -12,7 +12,7 @@ cookie_manager = CookieController()
 # CONFIGURAÇÃO INICIAL
 # ======================================================================
 PRESETS_FILE = "presets.json"
-client = OpenAI(api_key=st.secrets.openai.api_key)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(
     page_title='Raidan Data Collector + AI Agent (TradingView)',
@@ -173,57 +173,74 @@ def ask_agent_with_inline_csv(prompt: str, path: str, model: str) -> str:
 #=======================================================================
 def listar_presets() -> dict:
     conn = udb.create_connection()
-    cursor = conn.cursor(dictionary=True)
+    if conn is None:
+        return {}
 
-    cursor.execute(
-        """
+    query = """
         SELECT name, config
         FROM presets
         WHERE user_id = %s
         ORDER BY name
-        """,
-        (st.session_state.user_id,)
-    )
+    """
 
-    rows = cursor.fetchall()
+    with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+        cursor.execute(query, (st.session_state.user_id,))
+        rows = cursor.fetchall()
+
     conn.close()
+
+    return {
+        row["name"]: json.loads(row["config"])
+        for row in rows
+    }
 
     return {row["name"]: json.loads(row["config"]) for row in rows}
 def salvar_preset(nome: str, dados: dict):
     conn = udb.create_connection()
-    cursor = conn.cursor()
+    if conn is None:
+        return False
 
-    cursor.execute(
-        """
+    query = """
         INSERT INTO presets (user_id, name, config)
         VALUES (%s, %s, %s)
         ON DUPLICATE KEY UPDATE
             config = VALUES(config),
             updated_at = CURRENT_TIMESTAMP
-        """,
-        (
-            st.session_state.user_id,
-            nome,
-            json.dumps(dados, ensure_ascii=False)
-        )
-    )
+    """
 
-    conn.commit()
+    with conn.cursor() as cursor:
+        cursor.execute(
+            query,
+            (
+                st.session_state.user_id,
+                nome,
+                json.dumps(dados, ensure_ascii=False)
+            )
+        )
+        conn.commit()
+
     conn.close()
+    return True
+
 def deletar_preset(nome: str):
     conn = udb.create_connection()
-    cursor = conn.cursor()
+    if conn is None:
+        return False
 
-    cursor.execute(
-        """
+    query = """
         DELETE FROM presets
         WHERE user_id = %s AND name = %s
-        """,
-        (st.session_state.user_id, nome)
-    )
+    """
 
-    conn.commit()
+    with conn.cursor() as cursor:
+        cursor.execute(
+            query,
+            (st.session_state.user_id, nome)
+        )
+        conn.commit()
+
     conn.close()
+    return True
 
 # ======================================================================
 # UI (muito parecido com o seu original)
