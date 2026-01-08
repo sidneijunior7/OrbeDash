@@ -475,7 +475,7 @@ if st.session_state.logged_in:
                     # ---------------------------------------------------------
                     # Expansores individuais das operações
                     # ---------------------------------------------------------
-                    with st.expander(f"Detalhes da Operação #{t.get('id')} — {"COMPRA" if t.get("direction") == "LONG" else "VENDA"}", icon=f':material/description:'):
+                    with st.expander(f'Detalhes da Operação #{t.get("id")} — {"COMPRA" if t.get("direction") == "LONG" else "VENDA"}', icon=f':material/description:'):
                         st.subheader("Racional")
                         st.write(t.get("rationale", "-"))
 
