@@ -4,7 +4,7 @@ numpy
 plotly
 openai
 pytz
-mysql-connector-python
+PyMySQL
 streamlit_extras==0.5.0
 streamlit-cookies-manager
 streamlit-cookies-controller
