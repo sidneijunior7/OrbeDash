@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import os, json, time
 from openai import OpenAI
+import pymysql
 import include.users_database as udb
 # Dependência: tvdatafeed (usa websocket internamente)
 from tvDatafeed import TvDatafeed, Interval
