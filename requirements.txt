@@ -8,4 +8,5 @@ PyMySQL
 streamlit_extras==0.5.0
 streamlit-cookies-manager
 streamlit-cookies-controller
+dotenv
 tvdatafeed @ git+https://github.com/rongardF/tvdatafeed.git

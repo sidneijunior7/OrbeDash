@@ -1,21 +1,19 @@
-# app_tv_streamlit.py
-from unittest import skipIf
-
 import streamlit as st
 import pandas as pd
 import os, json, time
 from openai import OpenAI
 import pymysql
 import include.users_database as udb
-
+from dotenv import load_dotenv
+load_dotenv()
 # Dependência: tvdatafeed (usa websocket internamente)
 from tvDatafeed import TvDatafeed, Interval
-st.write(st.session_state)
+#st.write(st.session_state)
 # ======================================================================
 # CONFIGURAÇÃO INICIAL
 # ======================================================================
 PRESETS_FILE = "presets.json"
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY', st.secrets.openai.api_key))
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 st.set_page_config(
     page_title='Raidan Data Collector + AI Agent (TradingView)',
