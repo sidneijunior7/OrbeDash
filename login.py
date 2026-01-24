@@ -4,27 +4,15 @@ import hashlib
 from include import users_database as udb
 from include.password_reset import forgot_password
 from streamlit_extras.stylable_container import stylable_container
-from streamlit_cookies_controller import CookieController
-from streamlit_cookies_manager import EncryptedCookieManager
-
-# Função para carregar o CSS
-def load_css(file_path):
-    with open(file_path, "r") as f:
-        css_content = f.read()
-    return f"<style>{css_content}</style>"
-css = load_css('styles/login.css')
-st.markdown(css,unsafe_allow_html=True)
-
-cookie_manager = CookieController()
-controller = EncryptedCookieManager(prefix='rdx_', password='rdxdash')
-
+st.write(st.session_state)
 def update_login_cookies():
-
+    from streamlit_cookies_controller import CookieController
+    controller = CookieController()
     # Salvar no cookie
-    cookie_manager.set("logged_in", True)
-    cookie_manager.set("user_email", st.session_state["user_email"])
-    cookie_manager.set("expiration", st.session_state["expiration"])
-    controller.save()
+    controller.set('logged_in', True)
+    controller.set('user_email', st.session_state['user_email'])
+    controller.set('expiration', st.session_state['expiration'])
+    controller.set('access_lvl', st.session_state['access_lvl'])
 
 def hash_data(data, salt):
     combined = (salt + data).encode()
@@ -108,27 +96,30 @@ def login():
         return False
 
 def credentials_authorize():
-    # Restaurar informações de cookies
-    st.session_state["logged_in"] = cookie_manager.get("logged_in")
-    st.session_state["user_email"] = cookie_manager.get("user_email")
-    st.session_state["expiration"] = cookie_manager.get("expiration")
-
-    # Verificar expiração
-    expiration = st.session_state.get("expiration", 0)
-    if expiration == 0 or not expiration or expiration <= time.time() or st.session_state.contract_status!='active':
-        st.session_state["logged_in"] = False
-        st.session_state["user_email"] = ""
-        # cookie_manager.remove("logged_in")
-        # cookie_manager.remove("user_email")
-        # cookie_manager.remove("expiration")
+    if 'cookies' not in st.session_state or st.session_state.cookies is None or 'logged_in' not in st.session_state:
         return False
     else:
-        return True
+        # Verificar expiração
+        expiration = st.session_state.cookies.get("expiration", 0)
+        if expiration == 0 or not expiration or expiration <= time.time() or st.session_state.logged_in==False:
+            st.session_state.cookies["logged_in"] = False
+            st.session_state.cookies["user_email"] = ""
+            return False
+        else:
+            return True
 
 #===============================================================+
 #           INICIO DO CÓDIGO                                    +
 #===============================================================+
 
+# Função para carregar o CSS
+def load_css(file_path):
+    with open(file_path, "r") as f:
+        css_content = f.read()
+    return f"<style>{css_content}</style>"
+css = load_css('styles/login.css')
+st.markdown(css,unsafe_allow_html=True)
+#st.write(st.session_state)
 cole, colc, cold = st.columns([0.3, 0.4, 0.3], gap='large')
 
 with colc:
@@ -136,7 +127,6 @@ with colc:
     with stylable_container(key='login', css_styles='{}'):
 
         if not credentials_authorize():
-
             if not login():
                 st.stop()
         else:
