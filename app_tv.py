@@ -1,49 +1,48 @@
 # app_tv_streamlit.py
+from unittest import skipIf
+
 import streamlit as st
 import pandas as pd
 import os, json, time
 from openai import OpenAI
 import pymysql
 import include.users_database as udb
+
 # Dependência: tvdatafeed (usa websocket internamente)
 from tvDatafeed import TvDatafeed, Interval
-from streamlit_cookies_controller import CookieController
-cookie_manager = CookieController()
+st.write(st.session_state)
 # ======================================================================
 # CONFIGURAÇÃO INICIAL
 # ======================================================================
 PRESETS_FILE = "presets.json"
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY', st.secrets.openai.api_key))
 
 st.set_page_config(
     page_title='Raidan Data Collector + AI Agent (TradingView)',
     layout='wide',
     initial_sidebar_state='expanded',
 )
-# -------------------------------------------------------------------
-# CONEXÃO MYSQL
-# -------------------------------------------------------------------
-conn = udb.create_connection()
-if not conn:
-    st.error("Erro ao conectar ao banco MySQL.")
-    st.stop()
+
 # -------------------------------------------------------------------
 # FUNÇÃO DE LOGOUT
 # -------------------------------------------------------------------
 def logout():
-    cookie_manager.set('user_id', 0)
-    cookie_manager.set('user_email', None)
-    cookie_manager.set('expiration', 0)
+    st.session_state.logged_in = False
+    st.session_state.expiration = 0
+    st.session_state.email = ''
+
+    from streamlit_cookies_controller import CookieController
+    CookieController().set('logged_in', False)
+    CookieController().set('user_email', '')
+    CookieController().set('expiration', 0)
 
     with st.spinner("#### Encerrando Sessão ..."):
         time.sleep(2)
 
-    st.switch_page('login.py')
+    st.rerun()
 # -------------------------------------------------------------------
 # SIDEBAR
 # -------------------------------------------------------------------
-
-
 if 'resposta' not in st.session_state:
     st.session_state.resposta = None
 
@@ -222,7 +221,6 @@ def salvar_preset(nome: str, dados: dict):
 
     conn.close()
     return True
-
 def deletar_preset(nome: str):
     conn = udb.create_connection()
     if conn is None:
@@ -246,8 +244,10 @@ def deletar_preset(nome: str):
 # ======================================================================
 # UI (muito parecido com o seu original)
 # ======================================================================
-if st.session_state.logged_in:
-    name = udb.get_user_info(conn, "user_name", "users", st.session_state.user_email)[0][0]
+
+if 'logged_in' in st.session_state and st.session_state.logged_in:
+    conn = udb.create_connection()
+    name = udb.get_user_info(conn, "user_name", "users", st.session_state.email)[0][0]
 
     st.sidebar.write(f"👋 Bem-vindo, {(name.split()[0]).capitalize()}")
     conn.close()
@@ -263,10 +263,10 @@ if st.session_state.logged_in:
 
         defaults = {
             "ativos_b3": "WIN1!:BMFBOVESPA,WDO1!:BMFBOVESPA,DI11!:BMFBOVESPA",
-            "ativos_fx": "YM1!:CBOT,ES1!:CME,NQ1!:CME,DX1!:ICEUS,10Y1!:CBOT,2YY1!:CBOT,FDAX1!:EUREX,FESX1!:EUREX,CN1!:SGX,HSI1!:HKEX,FEF1!:SGX,BRN1!:ICEEUR,WBS1!:ICEEUR,VX1!:CBOE,NK2251!:OSE,AP1!:ASX24",
+            "ativos_fx": "US500:TICKMILL,US30:TICKMILL,USTEC:TICKMILL,DXY:TICKMILL,10Y1!:CBOT,2YY1!:CBOT,FDAX1!:EUREX,FESX1!:EUREX,CN1!:SGX,HSI1!:HKEX,FEF1!:SGX,BRN1!:ICEEUR,WBS1!:ICEEUR,VX1!:CBOE,NK2251!:OSE,AP1!:ASX24",
             "ativo_alvo": "WIN1!:BMFBOVESPA",
             "bars": 8,
-            "model": "gpt-5.1"
+            "model": "gpt-5"
         }
 
         st.sidebar.subheader("🔧 Configuração")
@@ -288,7 +288,7 @@ if st.session_state.logged_in:
 
         st.session_state.ativo_alvo = st.text_input("Ativo alvo", defaults["ativo_alvo"])
         st.session_state.bars = st.sidebar.slider("Número de barras", 1, 500, defaults["bars"])
-        model_list = ["gpt-5.1", "gpt-5.1-chat-latest", "gpt-5-pro", "gpt-5-nano", "o3-pro", "gpt-4.1"]
+        model_list = ["gpt-5", "gpt-5-2025-08-07", "gpt-5.1", "gpt-5.1-chat-latest", "gpt-5-pro", "gpt-5-nano", "o3-pro", "gpt-4.1"]
         st.session_state.model = st.sidebar.selectbox("Modelo", model_list, index=model_list.index(defaults["model"]))
 
         if st.sidebar.button("💾 Salvar Preset"):
@@ -519,4 +519,16 @@ if st.session_state.logged_in:
             assumptions = data.get("assumptions", [])
             for asm in assumptions:
                 st.markdown(f"- {asm}")
+else:
+    from streamlit_cookies_controller import CookieController
+    cookies = CookieController().getAll()
 
+    if 'cookies' in st.session_state and st.session_state.cookies is not None:
+        if st.session_state.cookies['logged_in']:
+            st.session_state['logged_in'] = st.session_state['cookies']['logged_in']
+            st.session_state['email'] = st.session_state['cookies']['user_email']
+            st.session_state['access_lvl'] = st.session_state['cookies']['access_lvl']
+            st.session_state['expiration'] = st.session_state['cookies']['expiration']
+            st.rerun()
+        else:
+            st.switch_page('login.py')
