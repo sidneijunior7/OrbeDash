@@ -2,10 +2,11 @@ import os
 import streamlit
 import pymysql
 from pymysql import MySQLError
-
+from dotenv import load_dotenv
 
 def create_connection():
     try:
+        load_dotenv()
         conn = pymysql.connect(
             host=os.getenv("MYSQL_HOST", "localhost"),
             user=os.getenv("MYSQL_USER", "root"),
