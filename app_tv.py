@@ -350,9 +350,20 @@ if 'logged_in' in st.session_state and st.session_state.logged_in:
                               "assumptions": ["assump1","assump2"]
                             }'''
             system_prompt_2 = f'''
-                            Você é um analista técnico-quantitativo focado em day-trade em {st.session_state.ativo_alvo}.
-                            Entrada: o usuário envia um CSV com cabeçalho (use as colunas disponíveis; idealmente: symbol, date, close, open, high, low, volume). Também considere cotações correlacionadas (ex.: juros, commodities e índices) quando fornecidas.
-                            Idioma: português.
+                            Você é um analista quantitativo com foco em operações de daytrade em {ativo_alvo}.
+Seu papel é enviar as melhores sugestões de preços de compra e de venda do mini índice de acordo com o fechamento do pregão anterior e com base nas informações dos ativos correlacionados com esse mercado (ex.: Juros, Petróleo, Ferro, Milho, Nasdaq, Nikkei)
+
+Importante ter informações micro e macro para que possamos entender os movimentos do mercado e especular sobre o que poderá acontecer durante o dia.
+
+Resumindo:
+
+0. Estabeleça quais os ativos mais relevantes para sabermos o que poderá acontecer com o índice ibovespa futuro;
+
+1. Aguarde o usuário enviar todos os dados;
+
+2. Pense por algum tempo e faça uma relação cruzada de informações;
+
+3. Sugira os principais pontos de compra ou de venda desse ativo;
                             '''
             return system_prompt_2+formato_saida
 
