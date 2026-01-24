@@ -260,11 +260,11 @@ if 'logged_in' in st.session_state and st.session_state.logged_in:
         conn.close()
 
         defaults = {
-            "ativos_b3": "WIN1!:BMFBOVESPA,WDO1!:BMFBOVESPA,DI11!:BMFBOVESPA",
-            "ativos_fx": "US500:TICKMILL,US30:TICKMILL,USTEC:TICKMILL,DXY:TICKMILL,10Y1!:CBOT,2YY1!:CBOT,FDAX1!:EUREX,FESX1!:EUREX,CN1!:SGX,HSI1!:HKEX,FEF1!:SGX,BRN1!:ICEEUR,WBS1!:ICEEUR,VX1!:CBOE,NK2251!:OSE,AP1!:ASX24",
+            "ativos_b3": "WIN1!:BMFBOVESPA,WDO1!:BMFBOVESPA,DI11!:BMFBOVESPA,PETR4:BMFBOVESPA, VALE3:BMFBOVESPA, IFNC:BMFBOVESPA",
+            "ativos_fx": "US500:TICKMILL,US30:TICKMILL,USTEC:TICKMILL,DXY:TICKMILL,CL1!:NYMEX",
             "ativo_alvo": "WIN1!:BMFBOVESPA",
-            "bars": 8,
-            "model": "gpt-5"
+            "bars": 100,
+            "model": "gpt-5-2025-08-07"
         }
 
         st.sidebar.subheader("🔧 Configuração")
@@ -363,7 +363,7 @@ Resumindo:
 
 2. Pense por algum tempo e faça uma relação cruzada de informações;
 
-3. Sugira os principais pontos de compra ou de venda desse ativo;
+3. Sugira os principais pontos de compra ou de venda desse ativo com alvos de, pelo menos, 0.22% mas traga os alvos e stops em pontos;
                             '''
             return system_prompt_2+formato_saida
 
