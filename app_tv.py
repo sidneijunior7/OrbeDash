@@ -260,8 +260,8 @@ if 'logged_in' in st.session_state and st.session_state.logged_in:
         conn.close()
 
         defaults = {
-            "ativos_b3": "WIN1!:BMFBOVESPA,WDO1!:BMFBOVESPA,DI11!:BMFBOVESPA,PETR4:BMFBOVESPA, VALE3:BMFBOVESPA, IFNC:BMFBOVESPA",
-            "ativos_fx": "US500:TICKMILL,US30:TICKMILL,USTEC:TICKMILL,DXY:TICKMILL,CL1!:NYMEX",
+            "ativos_b3": "WIN1!:BMFBOVESPA,WDO1!:BMFBOVESPA,EWZ:NYSE,PBR:NYSE,VALE:NYSE,ITUB:NYSE,BBD:NYSE,BR20:DJCFD",
+            "ativos_fx": "US500:TICKMILL,US30:TICKMILL,USTEC:TICKMILL,DXY:TICKMILL,CL1!:NYMEX,NIKKEI225:VANTAGE,KOSPI:TVC,FEF1!:SGX,ASX:IG",
             "ativo_alvo": "WIN1!:BMFBOVESPA",
             "bars": 100,
             "model": "gpt-5-2025-08-07"
@@ -361,7 +361,7 @@ Resumindo:
 
 1. Aguarde o usuário enviar todos os dados;
 
-2. Pense por algum tempo e faça uma relação cruzada de informações;
+2. Pense por algum tempo e faça uma relação cruzada de informações, verifique as datas para ver se não houveram feriados;
 
 3. Sugira uma principal operação do dia, compra ou de venda desse ativo com alvos de, pelo menos, 0.22% mas traga os alvos e stops em pontos;
                             '''
@@ -541,4 +541,5 @@ else:
             st.rerun()
         else:
             st.switch_page('login.py')
+
 
