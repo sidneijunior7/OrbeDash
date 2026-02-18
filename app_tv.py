@@ -363,7 +363,7 @@ Resumindo:
 
 2. Pense por algum tempo e faça uma relação cruzada de informações;
 
-3. Sugira os principais pontos de compra ou de venda desse ativo com alvos de, pelo menos, 0.22% mas traga os alvos e stops em pontos;
+3. Sugira uma principal operação do dia, compra ou de venda desse ativo com alvos de, pelo menos, 0.22% mas traga os alvos e stops em pontos;
                             '''
             return system_prompt_2+formato_saida
 
@@ -541,3 +541,4 @@ else:
             st.rerun()
         else:
             st.switch_page('login.py')
+
